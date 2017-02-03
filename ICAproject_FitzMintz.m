@@ -21,27 +21,38 @@ subplot(2,1,2); plot(c(2,:),'r');
 
 info = audioinfo('record_kf-sync.mp3');
 [kf,kf_Fs] = audioread('record_kf-sync.mp3');
+kf= 0.5*kf(:,1)+0.5*kf(:,2);
 %kf = resample(kf,16000,kf_Fs);
 %kf_Fs = 16000;
 [ash,ash_Fs] = audioread('record_ASH-sync.mp3');
-ash = ash(:,1);
+%ash = resample(ash,16000,ash_Fs);
 [tony,tony_Fs] = audioread('record_tony-sync.mp3');
+%tony = resample(tony,16000,tony_Fs);
+[my,my_Fs] = audioread('record_MY-sync.mp3');
+[cc,cc_Fs] = audioread('record_CC-sync.mp3');
+%my = resample(my,16000,my_Fs);
 %tony = resample(tony(:,1),16000,tony_Fs);
 %tony_Fs = 16000;
 %[sh,sh_Fs] = audioread('record_SH.mp3');
-%t1 = 0:seconds(1/Fs):seconds(info.Duration);
-start= 290000;
+t = 0:seconds(1/kf_Fs):seconds(info.Duration);
+t= t(1:end-1);
+start= 0;
 stop = 307950;
-sound(kf(start:stop),kf_Fs);
-t = linspace(0,seconds(info.Duration),length(kf));% t1(1:end-1);
+%t = linspace(0,seconds(info.Duration),length(kf));% 
 figure;
-subplot(2,1,1); plot(t(start:stop),kf(start:stop,2));
-subplot(2,1,2); plot(t(start:stop),kf(start:stop,1),'r');
-xlabel('Time')
+subplot(5,1,1); plot(t,kf);
+subplot(5,1,2); plot(t,ash,'r');
+subplot(5,1,3); plot(t,tony,'k');
 ylabel('Audio Signal')
-%{
-c = fastica([ash.',tony.']);
+subplot(5,1,4); plot(t,my,'g');
+subplot(5,1,5); plot(t,cc,'y');
+xlabel('Time')
+
+
+c = fastica([ash,tony,kf,my,cc].');
 figure;
-subplot(2,1,1); plot(t,c(1,:));
-subplot(2,1,2); plot(t,c(2,:),'r');
-%}
+subplot(5,1,1); plot(t,c(1,:));
+subplot(5,1,2); plot(t,c(2,:),'r');
+subplot(5,1,3); plot(t,c(3,:),'k');
+subplot(5,1,4); plot(t,c(4,:),'g');
+subplot(5,1,5); plot(t,c(5,:),'y');
