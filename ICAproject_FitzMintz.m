@@ -1,58 +1,73 @@
+clear all;
 addpath ('/home/kt-fitz/Documents/MATLAB/MATLAB/FastICA_25;')
+
 %{
-A = sin(linspace(0,50, 1000));   % A
-B = sin(linspace(0,37, 1000)+5); % B
-figure; 
-subplot(2,1,1); plot(A);         % plot A
-subplot(2,1,2); plot(B, 'r');    % plot B
-
-M1 = A - 2*B;                  % mixing 1
-M2 = 1.73*A+3.41*B;            % mixing 2
-figure;
-subplot(2,1,1); plot(M1);      % plot mixing 1
-subplot(2,1,2); plot(M2, 'r'); % plot mixing 2
-
-figure;
-
-c = fastica([M1;M2]);              % compute and plot unminxing using fastICA	
-subplot(2,1,1); plot(c(1,:));
-subplot(2,1,2); plot(c(2,:),'r');
-%}
-
-info = audioinfo('record_kf-sync.mp3');
-[kf,kf_Fs] = audioread('record_kf-sync.mp3');
-kf= 0.5*kf(:,1)+0.5*kf(:,2);
-%kf = resample(kf,16000,kf_Fs);
-%kf_Fs = 16000;
-[ash,ash_Fs] = audioread('record_ASH-sync.mp3');
-%ash = resample(ash,16000,ash_Fs);
-[tony,tony_Fs] = audioread('record_tony-sync.mp3');
-%tony = resample(tony,16000,tony_Fs);
-[my,my_Fs] = audioread('record_MY-sync.mp3');
-[cc,cc_Fs] = audioread('record_CC-sync.mp3');
-%my = resample(my,16000,my_Fs);
-%tony = resample(tony(:,1),16000,tony_Fs);
-%tony_Fs = 16000;
-%[sh,sh_Fs] = audioread('record_SH.mp3');
+There was no need to resample although if that is necessary, you can use:
+record = resample(recording,desired_rate, actual_rate);
+All files were synced in audacity and export to mp3 at 16kHz. Some samples
+were originally, 44.1kHz and others were 15kHz. So there was only
+subsampling, no oversampling. By using audacity it guarunteed that all
+samples were the same length when imported, so no manipulation was done in
+the regard either.
+A conversion from stereo to mono was done on stereo samples by average the
+two.
+ %}
+NumSamps = 7;
+NumSig = 4;
+info = audioinfo('record_kf-sync2.mp3')
+[kf,kf_Fs] = audioread('record_kf-sync2.mp3');
+%kf= 0.5*kf(:,1)+0.5*kf(:,2); %conversion from stereo to mono
+[ash,ash_Fs] = audioread('record_ASH-sync2.mp3');
+[tony,tony_Fs] = audioread('record_tony-sync2.mp3');
+[my,my_Fs] = audioread('record_MY-sync2.mp3');
+[cc,cc_Fs] = audioread('record_CC-sync2.mp3');
+[mb,mb_Fs] = audioread('record_MB-sync2.mp3');
+[mw,mw_Fs] = audioread('record_MW-sync2.mp3');
+mix = [ash,tony,kf,my,cc,mb,mw].';
+NumSamps = length(mix(:,1));
 t = 0:seconds(1/kf_Fs):seconds(info.Duration);
 t= t(1:end-1);
-start= 0;
-stop = 307950;
-%t = linspace(0,seconds(info.Duration),length(kf));% 
-figure;
-subplot(5,1,1); plot(t,kf);
-subplot(5,1,2); plot(t,ash,'r');
-subplot(5,1,3); plot(t,tony,'k');
+
+start= 0; %for debugging purposes only
+stop = 307950;%for debugging purposes
+colorVec=cool(NumSamps);
+
+figure(1);
 ylabel('Audio Signal')
-subplot(5,1,4); plot(t,my,'g');
-subplot(5,1,5); plot(t,cc,'y');
 xlabel('Time')
+for i=1:NumSamps;
+    figure(1)
+    subplot(NumSamps,1,i); plot(t,mix(i,:),'Color',colorVec(i,:))
+end
 
 
-c = fastica([ash,tony,kf,my,cc].');
-figure;
-subplot(5,1,1); plot(t,c(1,:));
-subplot(5,1,2); plot(t,c(2,:),'r');
-subplot(5,1,3); plot(t,c(3,:),'k');
-subplot(5,1,4); plot(t,c(4,:),'g');
-subplot(5,1,5); plot(t,c(5,:),'y');
+%perform the fast ICA by passing the stack of mixed signals
+%[ctemp,A1,W1] = fastica(mix,'numofIC',NumSig-1,'initGuess',[0.05;0.0;0.0;0.0]);
+%[ctemp2, A2,W2] = fastica(mix,'initGuess',A1,'numofIC',NumSig);
+[stage1,A3,W3]=fastica(mix,'numofIC',NumSig);
+c=stage1/10;
+colorVec2= prism(NumSig);
+for i=1:NumSig
+    figure(2);%the separated signals
+    subplot(NumSig,1,i); plot(t,c(i,:),'Color',colorVec2(i,:));
+    file = strcat('/home/kt-fitz/BME463/output/ICA-',num2str(i),'_v2.wav');
+    audiowrite(file,c(i,:),kf_Fs);
+end
+%{
+subplot(NumSig,1,2); plot(t,c(2,:),'r');
+subplot(NumSig,1,3); plot(t,c(3,:),'m');
+subplot(NumSig,1,4); plot(t,c(4,:),'y');
+
+subplot(NumSig,1,5); plot(t,c(5,:),'g');
+subplot(NumSig,1,6); plot(t,c(6,:),'b');
+subplot(NumSig,1,7); plot(t,c(7,:),'k');
+
+audiowrite('/home/kt-fitz/BME463/output/ICA-idk1.wav',c(1,:),kf_Fs);
+audiowrite('/home/kt-fitz/BME463/output/ICA-idk2.wav',c(2,:),kf_Fs);
+audiowrite('/home/kt-fitz/BME463/output/ICA-idk3.wav',c(3,:),kf_Fs);
+audiowrite('/home/kt-fitz/BME463/output/ICA-idk4.wav',c(4,:),kf_Fs);
+
+audiowrite('/home/kt-fitz/BME463/output/ICA-idk5.wav',c(5,:),kf_Fs);
+audiowrite('/home/kt-fitz/BME463/output/ICA-idk6.wav',c(6,:),kf_Fs);
+audiowrite('/home/kt-fitz/BME463/output/ICA-idk7.wav',c(7,:),kf_Fs);
+%}
