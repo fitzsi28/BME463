@@ -1,6 +1,6 @@
 clear all;
-addpath ('/home/kt-fitz/Documents/MATLAB/MATLAB/FastICA_25;')
-addpath ('/home/kt-fitz/Documents/MATLAB/suplabel;')
+addpath ('C:\Users\Kathleen\Documents\MATLAB\MATLAB\FastICA_25;')
+addpath ('C:\Users\Kathleen\Documents\MATLAB\suplabel;')
 
 %{
 There was no need to resample although if that is necessary, you can use:
