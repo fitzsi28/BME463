@@ -17,9 +17,8 @@ When you run c
  %}
 
 NumSig = 3;
-info = audioinfo('record_kf-sync2.mp3')
+info = audioinfo('record_ASH-sync2.mp3')
 [kf,kf_Fs] = audioread('record_kf-sync2.mp3');
-
 [ash,ash_Fs] = audioread('record_ASH-sync2.mp3');
 [tony,tony_Fs] = audioread('record_tony-sync2.mp3');
 [my,my_Fs] = audioread('record_MY-sync2.mp3');
@@ -29,7 +28,7 @@ info = audioinfo('record_kf-sync2.mp3')
 mix = [tony,mw,my,ash,mb].';%[tony,my,mb,mw].';%[ash,tony,kf,my,cc,mb,mw].';
 NumSamps = length(mix(:,1));
 t = 0:seconds(1/kf_Fs):seconds(info.Duration);
-t= t(1:end-1);
+t= t(1:end-529);
 
 start= 0; %for debugging purposes only
 stop = 307950;%for debugging purposes
@@ -49,7 +48,7 @@ suplabel('Audio Signal','y')
 %[ctemp,A1,W1] = fastica(mix,'numofIC',NumSig-1,'initGuess',[0.05;0.0;0.0;0.0]);
 %[ctemp2, A2,W2] = fastica(mix,'initGuess',A1,'numofIC',NumSig);
 [stage1,A1,W1]=fastica(mix,'numofIC',NumSig);
-plotandsave(t,kf_Fs,stage1/10,'stage1');
+plotandsave(t,kf_Fs,stage1/10,'stage1',2);
 mix2 = stage1;% cat(1,stage1,kf.',cc.');
 [stage2,A2,W2]=fastica(mix2,'numofIC',NumSig);
-plotandsave(t,kf_Fs,stage2/10,'stage2');
+plotandsave(t,kf_Fs,stage2/10,'stage2',3);
