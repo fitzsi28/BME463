@@ -1,7 +1,8 @@
 clear all;
-addpath ('C:\Users\Kathleen\Documents\MATLAB\MATLAB\FastICA_25;')
-addpath ('C:\Users\Kathleen\Documents\MATLAB\suplabel;')
-
+%addpath ('C:\Users\Kathleen\Documents\MATLAB\MATLAB\FastICA_25;')
+%addpath ('C:\Users\Kathleen\Documents\MATLAB\suplabel;')
+addpath ('/home/kt-fitz/Documents/MATLAB/MATLAB/FastICA_25;')		
+addpath ('/home/kt-fitz/Documents/MATLAB/suplabel;')
 %{
 There was no need to resample although if that is necessary, you can use:
 record = resample(recording,desired_rate, actual_rate);
@@ -17,15 +18,21 @@ When you run c
  %}
 
 NumSig = 3;
-info = audioinfo('record_ASH-sync2.mp3')
-[kf,kf_Fs] = audioread('record_kf-sync2.mp3');
-[ash,ash_Fs] = audioread('record_ASH-sync2.mp3');
-[tony,tony_Fs] = audioread('record_tony-sync2.mp3');
-[my,my_Fs] = audioread('record_MY-sync2.mp3');
-[cc,cc_Fs] = audioread('record_CC-sync2.mp3');
-[mb,mb_Fs] = audioread('record_MB-sync2.mp3');
-[mw,mw_Fs] = audioread('record_MW-sync2.mp3');
-mix = [tony,mw,my,ash,mb].';%[tony,my,mb,mw].';%[ash,tony,kf,my,cc,mb,mw].';
+%info = audioinfo('record_Al.m4a')
+[Al,Al_FS] = audioread('record_Al.m4a');
+[ash,ash_Fs] = audioread('record_ASH.m4a');
+
+[kf,kf_Fs] = audioread('nosync-data\record_Al.m4a');
+[tony,tony_Fs] = audioread('nosync-data\record_Al.m4a');
+[my,my_Fs] = audioread('nosync-data\record_Al.m4a');
+[cc,cc_Fs] = audioread('nosync-data\record_Al.m4a');
+[mb,mb_Fs] = audioread('nosync-data\record_Al.m4a');
+[mw,mw_Fs] = audioread('nosync-data\record_Al.m4a');
+
+%mix = [tony,mw,my,ash,mb].';%[tony,my,mb,mw].';%[ash,tony,kf,my,cc,mb,mw].';
+
+
+%{
 NumSamps = length(mix(:,1));
 t = 0:seconds(1/kf_Fs):seconds(info.Duration);
 t= t(1:end-529);
@@ -52,3 +59,4 @@ plotandsave(t,kf_Fs,stage1/10,'stage1',2);
 mix2 = stage1;% cat(1,stage1,kf.',cc.');
 [stage2,A2,W2]=fastica(mix2,'numofIC',NumSig);
 plotandsave(t,kf_Fs,stage2/10,'stage2',3);
+%}
